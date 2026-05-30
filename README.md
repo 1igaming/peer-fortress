@@ -4,6 +4,8 @@ Operator-local tooling that turns a Monero node's `sync_info` peer list into a *
 
 This is **alpha / milestone-0** — a proof of concept for the **[Peer Fortress — Tor & Eclipse Defense](https://repo.getmonero.org/monero-project/ccs-proposals)** CCS proposal (62 XMR, 4 months). Tor egress health checks, spy heuristics, playbooks, and monerosim scenarios are planned in funded milestones.
 
+**v0.2 additions:** `--report` human-readable output, monerosim scenario templates, `--list-scenarios`.
+
 **Related:** complements [ProbeLab P2P metrics (!667)](https://repo.getmonero.org/monero-project/ccs-proposals/-/merge_requests/667) with **per-node** scoring, not network-wide telemetry.
 
 ## Problem
@@ -77,6 +79,26 @@ python -m peer_fortress --tor-check --socks-host 127.0.0.1 --socks-port 9050 --j
 ```
 
 Exit code `0` = handshake OK, `1` = proxy down or misconfigured.
+
+## Extended report (`--report`)
+
+```powershell
+python -m peer_fortress --report
+python -m peer_fortress --tor-check --report
+```
+
+Produces a formatted report with score bar, recommendations, and bucket breakdown.
+
+## monerosim scenario templates (stub)
+
+Eclipse rehearsal scenario for Milestone 4:
+
+```powershell
+python -m peer_fortress --list-scenarios
+python -m peer_fortress --scenario scenarios/eclipse-rehearsal.yaml
+```
+
+Templates live in `scenarios/`. Full monerosim integration requires [Fountain5405/monerosim](https://github.com/Fountain5405/monerosim) (coordinate with Gingeropolous).
 
 ## Custom fixture
 

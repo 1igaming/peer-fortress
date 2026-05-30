@@ -9,10 +9,13 @@ from pathlib import Path
 
 from peer_fortress import __version__
 from peer_fortress.diversity import analyze_sync_info
+from peer_fortress.monerosim import format_scenario_summary, list_scenarios, load_scenario
+from peer_fortress.report import format_diversity_report, format_tor_report
 from peer_fortress.rpc import fetch_sync_info, load_fixture
 from peer_fortress.tor_health import check_socks5, format_tor_health
 
 DEFAULT_FIXTURE = Path(__file__).parent / "fixtures" / "sample_sync_info.json"
+DEFAULT_SCENARIOS = Path(__file__).parent.parent / "scenarios"
 
 
 def _format_text(report) -> str:
@@ -60,22 +63,59 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
     p.add_argument(
+        "--report",
+        action="store_true",
+        help="Extended human-readable report with recommendations",
+    )
+    p.add_argument(
         "--tor-check",
         action="store_true",
         help="Check Tor SOCKS5 proxy reachability (default 127.0.0.1:9050) and exit",
     )
     p.add_argument("--socks-host", default="127.0.0.1", help="SOCKS5 host for --tor-check")
     p.add_argument("--socks-port", type=int, default=9050, help="SOCKS5 port for --tor-check")
+    p.add_argument(
+        "--scenario",
+        metavar="YAML",
+        help="Load monerosim scenario template and print rehearsal summary",
+    )
+    p.add_argument(
+        "--list-scenarios",
+        action="store_true",
+        help="List monerosim scenario templates in scenarios/",
+    )
     return p
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
 
+    if args.list_scenarios:
+        scenarios = list_scenarios(DEFAULT_SCENARIOS)
+        if args.json:
+            print(json.dumps([s.to_dict() for s in scenarios], indent=2))
+        elif not scenarios:
+            print(f"No scenarios found in {DEFAULT_SCENARIOS}")
+        else:
+            for s in scenarios:
+                print(format_scenario_summary(s))
+                print("-" * 60)
+        return 0
+
+    if args.scenario:
+        scenario = load_scenario(Path(args.scenario))
+        if args.json:
+            print(json.dumps(scenario.to_dict(), indent=2))
+        else:
+            print(format_scenario_summary(scenario))
+        return 0
+
     if args.tor_check:
         report = check_socks5(args.socks_host, args.socks_port)
         if args.json:
             print(json.dumps(report.to_dict(), indent=2))
+        elif args.report:
+            print(format_tor_report(report))
         else:
             print(format_tor_health(report))
         return 0 if report.reachable else 1
@@ -98,6 +138,8 @@ def main(argv: list[str] | None = None) -> int:
         out = report.to_dict()
         out["source"] = source
         print(json.dumps(out, indent=2))
+    elif args.report:
+        print(format_diversity_report(report, source=source))
     else:
         print(_format_text(report))
         print(f"\nSource: {source}")
