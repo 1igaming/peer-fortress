@@ -10,6 +10,7 @@ from pathlib import Path
 from peer_fortress import __version__
 from peer_fortress.diversity import analyze_sync_info
 from peer_fortress.rpc import fetch_sync_info, load_fixture
+from peer_fortress.tor_health import check_socks5, format_tor_health
 
 DEFAULT_FIXTURE = Path(__file__).parent / "fixtures" / "sample_sync_info.json"
 
@@ -58,11 +59,26 @@ def build_parser() -> argparse.ArgumentParser:
         help="Penalize low .onion ratio (use when monerod runs with --proxy)",
     )
     p.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    p.add_argument(
+        "--tor-check",
+        action="store_true",
+        help="Check Tor SOCKS5 proxy reachability (default 127.0.0.1:9050) and exit",
+    )
+    p.add_argument("--socks-host", default="127.0.0.1", help="SOCKS5 host for --tor-check")
+    p.add_argument("--socks-port", type=int, default=9050, help="SOCKS5 port for --tor-check")
     return p
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+
+    if args.tor_check:
+        report = check_socks5(args.socks_host, args.socks_port)
+        if args.json:
+            print(json.dumps(report.to_dict(), indent=2))
+        else:
+            print(format_tor_health(report))
+        return 0 if report.reachable else 1
 
     if args.rpc:
         sync_info = fetch_sync_info(args.rpc)

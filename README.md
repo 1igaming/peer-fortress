@@ -2,7 +2,9 @@
 
 Operator-local tooling that turns a Monero node's `sync_info` peer list into a **diversity score** and actionable warnings. No consensus changes, no network-wide crawl.
 
-This is **alpha / milestone-0** — a proof of concept for the Peer Fortress CCS proposal. Tor egress health checks, spy heuristics, playbooks, and monerosim scenarios are planned in funded milestones.
+This is **alpha / milestone-0** — a proof of concept for the **[Peer Fortress — Tor & Eclipse Defense](https://repo.getmonero.org/monero-project/ccs-proposals)** CCS proposal (62 XMR, 4 months). Tor egress health checks, spy heuristics, playbooks, and monerosim scenarios are planned in funded milestones.
+
+**Related:** complements [ProbeLab P2P metrics (!667)](https://repo.getmonero.org/monero-project/ccs-proposals/-/merge_requests/667) with **per-node** scoring, not network-wide telemetry.
 
 ## Problem
 
@@ -21,6 +23,23 @@ python -m peer_fortress
 ```
 
 Expected output includes a score, bucket breakdown, and warnings for subnet concentration / duplicate hosts.
+
+### Demo output (mock fixture)
+
+```
+Peer Fortress v0.1.1-milestone0 — diversity report
+Score: 72/100 (fair)
+Peers: 12 total | 0 .onion | 12 clearnet
+Buckets: 8 unique | max concentration 33% in 192.168.1.0/24
+Warnings:
+  - More than 25% of peers share one /24 bucket (192.168.1.0/24)
+Top buckets:
+  192.168.1.0/24: 4
+  10.0.0.0/24: 2
+  ...
+
+Source: peer_fortress/fixtures/sample_sync_info.json
+```
 
 JSON output:
 
@@ -47,6 +66,17 @@ python -m peer_fortress --rpc http://127.0.0.1:38081/json_rpc --expect-tor
 ```
 
 **Note:** A syncing node may report few peers; the score is less meaningful until P2P is warm.
+
+## Tor SOCKS5 health check (milestone-0 stub)
+
+When `monerod` runs behind Tor (`--proxy`), verify the local SOCKS5 port before trusting `.onion` peer ratios:
+
+```powershell
+python -m peer_fortress --tor-check
+python -m peer_fortress --tor-check --socks-host 127.0.0.1 --socks-port 9050 --json
+```
+
+Exit code `0` = handshake OK, `1` = proxy down or misconfigured.
 
 ## Custom fixture
 
@@ -79,6 +109,8 @@ Grades: **good** (80+), **fair** (60–79), **weak** (40–59), **poor** (<40).
 ```powershell
 python -m unittest discover -s tests -v
 ```
+
+CI runs the same suite on push via [GitHub Actions](.github/workflows/ci.yml).
 
 ## Roadmap (funded CCS milestones)
 
