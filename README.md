@@ -2,9 +2,9 @@
 
 Operator-local tooling that turns a Monero node's `sync_info` peer list into a **diversity score** and actionable warnings. No consensus changes, no network-wide crawl.
 
-This is **alpha / milestone-0** â€” a proof of concept for the **[Peer Fortress â€” Tor & Eclipse Defense](https://repo.getmonero.org/monero-project/ccs-proposals)** CCS proposal (62 XMR, 4 months). Tor egress health checks, spy heuristics, playbooks, and monerosim scenarios are planned in funded milestones.
+This is **alpha / milestone-0** — a proof of concept for the **[Peer Fortress — Tor & Eclipse Defense](https://github.com/1igaming/peer-fortress/issues/1)** CCS proposal (62 XMR, 4 months). Tor egress health checks, spy heuristics, playbooks, and monerosim scenarios are planned in funded milestones M1–M4. See [ROADMAP.md](ROADMAP.md).
 
-**v0.2 additions:** `--report` human-readable output, monerosim scenario templates, `--list-scenarios`.
+**v0.3.0:** JSON schema validation, rotation advisory, `--out` flag. Release: https://github.com/1igaming/peer-fortress/releases/tag/v0.3.0
 
 **Related:** complements [ProbeLab P2P metrics (!667)](https://repo.getmonero.org/monero-project/ccs-proposals/-/merge_requests/667) with **per-node** scoring, not network-wide telemetry.
 
@@ -136,21 +136,26 @@ CI runs the same suite on push via [GitHub Actions](.github/workflows/ci.yml).
 
 ## Roadmap (funded CCS milestones)
 
-1. CLI + diversity scoring + testnet demo *(this repo â€” milestone-0)*
-2. Spy heuristics (Rucknium / MRL #1124 citations) + Tor egress health module
-3. Read-only playbook suggestions + optional local UI
-4. monerosim scenario pack (coordinate with Gingeropolous)
+See [ROADMAP.md](ROADMAP.md) for full detail. Summary:
+
+| # | Name | Funds | Status |
+|---|------|-------|--------|
+| M0 | Prototype (diversity + Tor SOCKS5 stub) | pre-funding | **shipped** [v0.3.0](https://github.com/1igaming/peer-fortress/releases/tag/v0.3.0) |
+| M1 | CLI, diversity scoring, and testnet demo | 14 XMR | funded milestone |
+| M2 | Spy heuristics, Tor egress health, and playbook templates | 16 XMR | funded milestone |
+| M3 | Optional local UI and operator hardening guide | 14 XMR | funded milestone |
+| M4 | monerosim scenario pack (5 scenarios) and documentation | 18 XMR | funded milestone |
 
 ## License
 
-MIT â€” see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
 
 ## Non-goals
 
 - No monerod consensus or wallet protocol changes
 - No network-wide telemetry or dashboards
 - No I2P SAMv3 implementation (see jpk68 WIP)
-- No auto-applied banlists â€” human approval required for any live config change
+- No auto-applied banlists — human approval required for any live config change
 
 ## Author
 
