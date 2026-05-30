@@ -38,9 +38,19 @@ def _format_text(report) -> str:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    epilog = (
+        "Examples:\n"
+        "  peer-fortress                    # mock fixture, compact score\n"
+        "  peer-fortress --report           # extended report + rotation hints\n"
+        "  peer-fortress --json             # schema JSON (advisory rotation only)\n"
+        "  peer-fortress --rpc URL          # live monerod JSON-RPC\n"
+        "  peer-fortress --tor-check        # SOCKS5 health then exit\n"
+    )
     p = argparse.ArgumentParser(
         prog="peer-fortress",
         description="Analyze monerod peer diversity from sync_info (mock or live RPC).",
+        epilog=epilog,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     src = p.add_mutually_exclusive_group()
@@ -135,8 +145,9 @@ def main(argv: list[str] | None = None) -> int:
     report = analyze_sync_info(sync_info, expect_tor=args.expect_tor)
 
     if args.json:
-        out = report.to_dict()
-        out["source"] = source
+        from peer_fortress import __version__
+
+        out = report.to_schema_dict(tool_version=__version__, source=source)
         print(json.dumps(out, indent=2))
     elif args.report:
         print(format_diversity_report(report, source=source))

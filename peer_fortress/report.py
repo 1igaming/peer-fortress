@@ -53,6 +53,19 @@ def format_diversity_report(report: DiversityReport, *, source: str = "") -> str
         lines.append("    ✗ High concentration risk — review peer list and consider rotation.")
         lines.append("    → See funded milestone playbooks for human-approved rotation steps.")
 
+    if report.rotation_recommendations:
+        lines.extend(["", "  ROTATION (advisory — no auto-ban)"])
+        for rec in report.rotation_recommendations:
+            pri = rec.get("priority", "low").upper()
+            lines.append(f"    [{pri}] {rec.get('summary', '')}")
+            detail = rec.get("detail", "")
+            if detail:
+                lines.append(f"          {detail}")
+    if report.peers_to_review:
+        lines.extend(["", "  PEERS TO REVIEW (hot bucket)"])
+        for p in report.peers_to_review[:5]:
+            lines.append(f"    {p.get('host', '?')}  ({p.get('bucket', '')})")
+
     if source:
         lines.extend(["", f"  Source: {source}"])
 

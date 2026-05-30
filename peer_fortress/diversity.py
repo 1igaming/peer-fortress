@@ -34,9 +34,11 @@ class DiversityReport:
     warnings: list[str] = field(default_factory=list)
     bucket_counts: dict[str, int] = field(default_factory=dict)
     peers: list[PeerRecord] = field(default_factory=list)
+    rotation_recommendations: list[dict[str, Any]] = field(default_factory=list)
+    peers_to_review: list[dict[str, str]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        base = {
             "total_peers": self.total_peers,
             "onion_peers": self.onion_peers,
             "clearnet_peers": self.clearnet_peers,
@@ -52,6 +54,22 @@ class DiversityReport:
             "warnings": self.warnings,
             "bucket_counts": self.bucket_counts,
         }
+        if self.rotation_recommendations:
+            base["rotation_recommendations"] = self.rotation_recommendations
+        if self.peers_to_review:
+            base["peers_to_review"] = self.peers_to_review
+        return base
+
+    def to_schema_dict(self, *, tool_version: str, source: str = "") -> dict[str, Any]:
+        """JSON output aligned with schemas/diversity-report.schema.json."""
+        out = self.to_dict()
+        out.update({
+            "schema_version": "1.0",
+            "tool_version": tool_version,
+            "report_type": "diversity",
+            "source": source,
+        })
+        return out
 
 
 def _extract_host(raw: str) -> str:
@@ -176,4 +194,10 @@ def analyze_sync_info(sync_info: dict[str, Any], *, expect_tor: bool = False) ->
 
     report.score = max(0, min(100, int(round(score))))
     report.grade = _grade(report.score)
+
+    from peer_fortress.rotation import peers_to_review, recommend_rotations
+
+    recs = recommend_rotations(report)
+    report.rotation_recommendations = [r.to_dict() for r in recs]
+    report.peers_to_review = peers_to_review(report)
     return report
