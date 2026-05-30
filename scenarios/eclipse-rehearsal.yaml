@@ -1,0 +1,32 @@
+# Peer Fortress — monerosim eclipse rehearsal scenario template
+# Milestone-4 deliverable stub. Coordinate with Gingeropolous before upstream PR.
+#
+# Usage (future):
+#   monerosim run scenarios/eclipse-rehearsal.yaml
+#   peer-fortress --mock scenarios/fixtures/eclipse_sync_info.json --report
+
+name: eclipse-rehearsal
+description: >
+  Simulate an eclipse attack where a victim node is surrounded by peers from
+  two adjacent /24 subnets. Peer Fortress should score below 40 (poor) and
+  emit subnet concentration warnings before the operator applies rotation.
+scenario_type: eclipse
+nodes: 12
+duration_seconds: 300
+
+topology:
+  victim: 1
+  attacker_subnets:
+    - 192.168.1.0/24
+    - 192.168.2.0/24
+  honest_peers: 2
+
+peer_fortress_checks:
+  - "diversity score < 40 (poor grade)"
+  - "max_bucket_share > 0.5 warning present"
+  - "playbook suggests --add-priority-node from external /24"
+
+monerosim:
+  engine: "Fountain5405/monerosim"
+  network: stagenet
+  notes: "Stub only — requires monerosim install for live rehearsal"

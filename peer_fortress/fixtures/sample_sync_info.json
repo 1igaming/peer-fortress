@@ -1,0 +1,21 @@
+{
+  "result": {
+    "height": 2845123,
+    "target_height": 2845123,
+    "peers": [
+      {"id": "a1", "host": "192.168.1.10", "address": "192.168.1.10:18080", "last_seen": 0, "pruning_seed": 0, "rpc_port": 0, "rpc_credits_per_hash": 0, "avg_download": 0, "avg_upload": 0, "support_flags": 1},
+      {"id": "a2", "host": "192.168.1.11", "address": "192.168.1.11:18080", "last_seen": 0, "pruning_seed": 0, "rpc_port": 0, "rpc_credits_per_hash": 0, "avg_download": 0, "avg_upload": 0, "support_flags": 1},
+      {"id": "a3", "host": "192.168.1.12", "address": "192.168.1.12:18080", "last_seen": 0, "pruning_seed": 0, "rpc_port": 0, "rpc_credits_per_hash": 0, "avg_download": 0, "avg_upload": 0, "support_flags": 1},
+      {"id": "a4", "host": "192.168.1.13", "address": "192.168.1.13:18080", "last_seen": 0, "pruning_seed": 0, "rpc_port": 0, "rpc_credits_per_hash": 0, "avg_download": 0, "avg_upload": 0, "support_flags": 1},
+      {"id": "a5", "host": "192.168.1.14", "address": "192.168.1.14:18080", "last_seen": 0, "pruning_seed": 0, "rpc_port": 0, "rpc_credits_per_hash": 0, "avg_download": 0, "avg_upload": 0, "support_flags": 1},
+      {"id": "a6", "host": "192.168.1.15", "address": "192.168.1.15:18080", "last_seen": 0, "pruning_seed": 0, "rpc_port": 0, "rpc_credits_per_hash": 0, "avg_download": 0, "avg_upload": 0, "support_flags": 1},
+      {"id": "b1", "host": "10.0.0.5", "address": "10.0.0.5:18080", "last_seen": 0, "pruning_seed": 0, "rpc_port": 0, "rpc_credits_per_hash": 0, "avg_download": 0, "avg_upload": 0, "support_flags": 1},
+      {"id": "b2", "host": "10.0.0.6", "address": "10.0.0.6:18080", "last_seen": 0, "pruning_seed": 0, "rpc_port": 0, "rpc_credits_per_hash": 0, "avg_download": 0, "avg_upload": 0, "support_flags": 1},
+      {"id": "c1", "host": "203.0.113.44", "address": "203.0.113.44:18080", "last_seen": 0, "pruning_seed": 0, "rpc_port": 0, "rpc_credits_per_hash": 0, "avg_download": 0, "avg_upload": 0, "support_flags": 1},
+      {"id": "c2", "host": "203.0.113.45", "address": "203.0.113.45:18080", "last_seen": 0, "pruning_seed": 0, "rpc_credits_per_hash": 0, "avg_download": 0, "avg_upload": 0, "support_flags": 1},
+      {"id": "d1", "host": "abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx1234yz567890.onion", "address": "abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx1234yz567890.onion:18083", "last_seen": 0, "pruning_seed": 0, "rpc_port": 0, "rpc_credits_per_hash": 0, "avg_download": 0, "avg_upload": 0, "support_flags": 1},
+      {"id": "d2", "host": "fedcba0987654321zyxw9876vuts5432rqpo8765nmlk4321jihg098765.onion", "address": "fedcba0987654321zyxw9876vuts5432rqpo8765nmlk4321jihg098765.onion:18083", "last_seen": 0, "pruning_seed": 0, "rpc_port": 0, "rpc_credits_per_hash": 0, "avg_download": 0, "avg_upload": 0, "support_flags": 1},
+      {"id": "dup", "host": "203.0.113.44", "address": "203.0.113.44:18081", "last_seen": 0, "pruning_seed": 0, "rpc_port": 0, "rpc_credits_per_hash": 0, "avg_download": 0, "avg_upload": 0, "support_flags": 1}
+    ]
+  }
+}

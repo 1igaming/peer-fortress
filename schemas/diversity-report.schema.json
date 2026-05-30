@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/1igaming/peer-fortress/schemas/diversity-report.schema.json",
+  "title": "Peer Fortress diversity report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "tool_version",
+    "report_type",
+    "total_peers",
+    "score",
+    "grade"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "tool_version": { "type": "string" },
+    "report_type": { "enum": ["diversity", "tor_health"] },
+    "source": { "type": "string" },
+    "total_peers": { "type": "integer", "minimum": 0 },
+    "onion_peers": { "type": "integer", "minimum": 0 },
+    "clearnet_peers": { "type": "integer", "minimum": 0 },
+    "onion_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+    "unique_buckets": { "type": "integer", "minimum": 0 },
+    "max_bucket_share": { "type": "number", "minimum": 0, "maximum": 1 },
+    "max_bucket_label": { "type": "string" },
+    "duplicate_hosts": { "type": "integer", "minimum": 0 },
+    "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "grade": { "enum": ["good", "fair", "weak", "poor", "unknown"] },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "bucket_counts": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "rotation_recommendations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["priority", "category", "summary", "detail", "advisory_only"],
+        "properties": {
+          "priority": { "enum": ["high", "medium", "low"] },
+          "category": { "enum": ["concentration", "duplicates", "tor", "peer_count"] },
+          "summary": { "type": "string" },
+          "detail": { "type": "string" },
+          "advisory_only": { "const": true }
+        }
+      }
+    },
+    "peers_to_review": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "host": { "type": "string" },
+          "address": { "type": "string" },
+          "bucket": { "type": "string" }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}
