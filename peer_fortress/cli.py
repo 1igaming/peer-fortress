@@ -10,6 +10,7 @@ from pathlib import Path
 from peer_fortress import __version__
 from peer_fortress.diversity import analyze_sync_info
 from peer_fortress.monerosim import format_scenario_summary, list_scenarios, load_scenario
+from peer_fortress.playbook import format_playbooks, generate_playbooks
 from peer_fortress.report import format_diversity_report, format_tor_report
 from peer_fortress.rpc import fetch_sync_info, load_fixture
 from peer_fortress.tor_health import check_socks5, format_tor_health
@@ -42,11 +43,13 @@ def build_parser() -> argparse.ArgumentParser:
         "Examples:\n"
         "  peer-fortress                    # mock fixture, compact score\n"
         "  peer-fortress --report           # extended report + rotation hints\n"
+        "  peer-fortress --playbooks        # print advisory remediation playbooks\n"
         "  peer-fortress --json             # schema JSON (advisory rotation only)\n"
         "  peer-fortress --out report.json  # write JSON to file\n"
         "  peer-fortress --out r.json --validate-schema  # file + schema check\n"
         "  peer-fortress --rpc URL          # live monerod JSON-RPC\n"
         "  peer-fortress --tor-check        # SOCKS5 health then exit\n"
+        "  peer-fortress --serve            # open local web UI dashboard\n"
     )
     p = argparse.ArgumentParser(
         prog="peer-fortress",
@@ -105,6 +108,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--list-scenarios",
         action="store_true",
         help="List monerosim scenario templates in scenarios/",
+    )
+    p.add_argument(
+        "--playbooks",
+        action="store_true",
+        help="Generate and print advisory remediation playbooks for detected threats",
+    )
+    p.add_argument(
+        "--serve",
+        action="store_true",
+        help="Open the local web UI dashboard in the default browser",
     )
     return p
 
@@ -172,9 +185,22 @@ def main(argv: list[str] | None = None) -> int:
             print(text)
     elif args.report:
         print(format_diversity_report(report, source=source))
+    elif args.playbooks:
+        playbooks = generate_playbooks(report)
+        print(f"Peer Fortress v{__version__} — Advisory Playbooks ({len(playbooks)} triggered)\n")
+        print(format_playbooks(playbooks))
     else:
         print(_format_text(report))
         print(f"\nSource: {source}")
+
+    if args.serve:
+        import webbrowser
+        ui_path = Path(__file__).parent.parent / "ui" / "index.html"
+        if ui_path.exists():
+            webbrowser.open(ui_path.as_uri())
+            print(f"\nOpened UI: {ui_path}")
+        else:
+            print(f"\nUI not found at {ui_path} — run from the peer-fortress repo root.", file=sys.stderr)
 
     return 0
 

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Peer Fortress — local read-only operator dashboard for Monero node peer diversity and spy-node analysis." />
+  <title>Peer Fortress — Operator Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <polygon points="14,2 26,8 26,20 14,26 2,20 2,8" fill="#f97316" opacity="0.9"/>
+          <polygon points="14,6 22,10 22,18 14,22 6,18 6,10" fill="#0f172a"/>
+          <polygon points="14,10 18,12 18,16 14,18 10,16 10,12" fill="#f97316" opacity="0.7"/>
+        </svg>
+        <span>Peer Fortress</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-tab="overview" id="nav-overview">
+          <span class="nav-icon">◈</span> Overview
+        </a>
+        <a href="#" class="nav-item" data-tab="peers" id="nav-peers">
+          <span class="nav-icon">⬡</span> Peer Map
+        </a>
+        <a href="#" class="nav-item" data-tab="spy" id="nav-spy">
+          <span class="nav-icon">◉</span> Spy Audit
+        </a>
+        <a href="#" class="nav-item" data-tab="playbooks" id="nav-playbooks">
+          <span class="nav-icon">▦</span> Playbooks
+        </a>
+        <a href="#" class="nav-item" data-tab="tor" id="nav-tor">
+          <span class="nav-icon">◎</span> Tor Health
+        </a>
+        <a href="#" class="nav-item" data-tab="raw" id="nav-raw">
+          <span class="nav-icon">≡</span> Raw JSON
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <span class="badge-advisory">Advisory Only</span>
+        <div class="version-label">v1.0.0-m3</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Top bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 id="page-title">Overview</h1>
+          <span id="last-updated" class="timestamp"></span>
+        </div>
+        <div class="topbar-right">
+          <label class="source-label" for="rpc-url">RPC Endpoint</label>
+          <input id="rpc-url" class="rpc-input" type="text" placeholder="http://127.0.0.1:18081/json_rpc" />
+          <button id="btn-refresh" class="btn-primary" onclick="loadReport()">
+            <span id="refresh-icon">↺</span> Refresh
+          </button>
+          <input id="file-input" type="file" accept=".json" style="display:none" onchange="loadFromFile(event)" />
+          <button class="btn-secondary" onclick="document.getElementById('file-input').click()">Load JSON</button>
+        </div>
+      </header>
+
+      <!-- Tab panels -->
+      <div class="content-area">
+
+        <!-- OVERVIEW TAB -->
+        <section id="tab-overview" class="tab-panel active">
+          <div class="metric-grid">
+            <div class="metric-card" id="card-score">
+              <div class="metric-label">Diversity Score</div>
+              <div class="metric-value" id="val-score">—</div>
+              <div class="metric-sub" id="val-grade">Load a report</div>
+              <div class="score-ring-container">
+                <svg class="score-ring" viewBox="0 0 120 120">
+                  <circle cx="60" cy="60" r="50" class="ring-bg"/>
+                  <circle cx="60" cy="60" r="50" class="ring-fill" id="ring-fill"
+                          stroke-dasharray="0 314.159" stroke-dashoffset="78.54"/>
+                </svg>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Total Peers</div>
+              <div class="metric-value" id="val-total">—</div>
+              <div class="metric-sub"><span id="val-onion">—</span> .onion / <span id="val-clearnet">—</span> clearnet</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Unique Subnets</div>
+              <div class="metric-value" id="val-buckets">—</div>
+              <div class="metric-sub">Max concentration: <span id="val-max-share">—</span></div>
+            </div>
+            <div class="metric-card" id="card-spy">
+              <div class="metric-label">Spy Saturation</div>
+              <div class="metric-value" id="val-spy-score">—</div>
+              <div class="metric-sub"><span id="val-sybil-clusters">—</span> sybil clusters detected</div>
+            </div>
+          </div>
+
+          <div class="panel-row">
+            <div class="panel" style="flex:2">
+              <div class="panel-title">⚠ Warnings</div>
+              <ul id="warnings-list" class="warn-list"><li class="empty-state">No data loaded.</li></ul>
+            </div>
+            <div class="panel" style="flex:1">
+              <div class="panel-title">Top Subnets</div>
+              <div id="bucket-bars" class="bucket-bars"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PEER MAP TAB -->
+        <section id="tab-peers" class="tab-panel">
+          <div class="panel">
+            <div class="panel-title">Subnet Concentration Map</div>
+            <div id="peer-table-wrap">
+              <table class="data-table" id="peer-table">
+                <thead>
+                  <tr>
+                    <th>Subnet / Bucket</th>
+                    <th>Count</th>
+                    <th>Share</th>
+                    <th>Risk</th>
+                    <th>Bar</th>
+                  </tr>
+                </thead>
+                <tbody id="peer-tbody"><tr><td colspan="5" class="empty-state">Load a report.</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SPY AUDIT TAB -->
+        <section id="tab-spy" class="tab-panel">
+          <div class="panel">
+            <div class="panel-title">Spy Heuristic Signals</div>
+            <div id="spy-signals" class="signal-list"><p class="empty-state">Load a report.</p></div>
+          </div>
+          <div class="panel" style="margin-top:16px">
+            <div class="panel-title">Sybil Detection Summary</div>
+            <div id="spy-summary" class="spy-summary-grid"></div>
+          </div>
+        </section>
+
+        <!-- PLAYBOOKS TAB -->
+        <section id="tab-playbooks" class="tab-panel">
+          <div class="advisory-banner">
+            ⚠ ALL PLAYBOOKS ARE ADVISORY ONLY — No changes are applied automatically. Review each step before executing.
+          </div>
+          <div id="playbooks-container"><p class="empty-state">Load a report to generate playbooks.</p></div>
+        </section>
+
+        <!-- TOR HEALTH TAB -->
+        <section id="tab-tor" class="tab-panel">
+          <div class="panel">
+            <div class="panel-title">Tor SOCKS5 Health</div>
+            <div id="tor-status-display">
+              <p class="empty-state">Run <code>python -m peer_fortress --tor-check --json</code> and paste the output, or load a full report JSON that includes a <code>tor_health</code> key.</p>
+            </div>
+          </div>
+          <div class="panel" style="margin-top:16px">
+            <div class="panel-title">Paste Tor Health JSON</div>
+            <textarea id="tor-json-input" class="json-textarea" placeholder='{"reachable": true, "latency_ms": 142, ...}'></textarea>
+            <button class="btn-primary" style="margin-top:8px" onclick="parseTorJson()">Parse</button>
+          </div>
+        </section>
+
+        <!-- RAW JSON TAB -->
+        <section id="tab-raw" class="tab-panel">
+          <div class="panel" style="height:100%">
+            <div class="panel-title">Raw Report JSON</div>
+            <pre id="raw-json" class="raw-json">// Load a report to see its raw JSON output here.</pre>
+          </div>
+        </section>
+
+      </div><!-- /content-area -->
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
