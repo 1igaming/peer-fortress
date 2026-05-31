@@ -61,6 +61,19 @@ def format_diversity_report(report: DiversityReport, *, source: str = "") -> str
             detail = rec.get("detail", "")
             if detail:
                 lines.append(f"          {detail}")
+    
+    if report.spy_report:
+        spy = report.spy_report
+        sat_score = spy.get("spy_saturation_score", 0)
+        lines.extend([
+            "",
+            "  SPY HEURISTICS & SYBIL AUDIT",
+            f"    Spy saturation score: {sat_score}/100",
+        ])
+        for sig in spy.get("signals", []):
+            sev = sig.get("severity", "low").upper()
+            lines.append(f"    [{sev}] {sig.get('description', '')}")
+
     if report.peers_to_review:
         lines.extend(["", "  PEERS TO REVIEW (hot bucket)"])
         for p in report.peers_to_review[:5]:

@@ -36,6 +36,7 @@ class DiversityReport:
     peers: list[PeerRecord] = field(default_factory=list)
     rotation_recommendations: list[dict[str, Any]] = field(default_factory=list)
     peers_to_review: list[dict[str, str]] = field(default_factory=list)
+    spy_report: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         base = {
@@ -58,6 +59,8 @@ class DiversityReport:
             base["rotation_recommendations"] = self.rotation_recommendations
         if self.peers_to_review:
             base["peers_to_review"] = self.peers_to_review
+        if self.spy_report:
+            base["spy_report"] = self.spy_report
         return base
 
     def to_schema_dict(self, *, tool_version: str, source: str = "") -> dict[str, Any]:
@@ -196,8 +199,10 @@ def analyze_sync_info(sync_info: dict[str, Any], *, expect_tor: bool = False) ->
     report.grade = _grade(report.score)
 
     from peer_fortress.rotation import peers_to_review, recommend_rotations
+    from peer_fortress.spy_heuristics import analyze_spy_heuristics
 
     recs = recommend_rotations(report)
     report.rotation_recommendations = [r.to_dict() for r in recs]
     report.peers_to_review = peers_to_review(report)
+    report.spy_report = analyze_spy_heuristics(sync_info, report).to_dict()
     return report

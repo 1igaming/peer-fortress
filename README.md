@@ -1,4 +1,4 @@
-﻿# Peer Fortress (milestone-0)
+# Peer Fortress (milestone-0)
 
 Operator-local tooling that turns a Monero node's `sync_info` peer list into a **diversity score** and actionable warnings. No consensus changes, no network-wide crawl.
 
@@ -14,7 +14,7 @@ Home nodes running default `monerod` configs can end up peer-heavy on a single s
 
 [ProbeLab !667](https://repo.getmonero.org/monero-project/ccs-proposals/-/merge_requests/667) measures network-wide topology. Peer Fortress is the **local complement**: diversity scoring on **your node only**.
 
-## Quick start (mock mode â€” no daemon)
+## Quick start (mock mode — no daemon)
 
 ```powershell
 cd G:\Monero-CC\repos\peer-fortress
@@ -29,7 +29,7 @@ Expected output includes a score, bucket breakdown, and warnings for subnet conc
 ### Demo output (mock fixture)
 
 ```
-Peer Fortress v0.1.1-milestone0 â€” diversity report
+Peer Fortress v0.1.1-milestone0 — diversity report
 Score: 72/100 (fair)
 Peers: 12 total | 0 .onion | 12 clearnet
 Buckets: 8 unique | max concentration 33% in 192.168.1.0/24
@@ -60,7 +60,7 @@ Start `monerod` on stagenet or testnet with RPC enabled (default bind `127.0.0.1
 | Testnet | 28081 |
 
 ```powershell
-# Stagenet example â€” no full sync required for peer list once connected
+# Stagenet example — no full sync required for peer list once connected
 python -m peer_fortress --rpc http://127.0.0.1:38081/json_rpc
 
 # If monerod runs behind Tor proxy, expect .onion peers:
@@ -114,7 +114,7 @@ curl -s http://127.0.0.1:38081/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"
 
 ## What the score means
 
-Heuristic only â€” not a security guarantee.
+Heuristic only — not a security guarantee.
 
 | Signal | Effect |
 |--------|--------|
@@ -124,7 +124,7 @@ Heuristic only â€” not a security guarantee.
 | Low .onion ratio when `--expect-tor` | Penalty |
 | Fewer than 8 peers | Warning + small penalty |
 
-Grades: **good** (80+), **fair** (60â€“79), **weak** (40â€“59), **poor** (<40).
+Grades: **good** (80+), **fair** (60-79), **weak** (40-59), **poor** (<40).
 
 ## Tests
 
@@ -160,4 +160,3 @@ MIT — see [LICENSE](LICENSE).
 ## Author
 
 **1igaming** — https://github.com/1igaming
-
