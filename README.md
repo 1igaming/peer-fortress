@@ -163,7 +163,7 @@ MIT — see [LICENSE](LICENSE).
 - No monerod consensus or wallet protocol changes
 - No network-wide telemetry or dashboards
 - No I2P SAMv3 implementation (see jpk68 WIP)
-- No auto-applied banlists — human approval required for any live config change
+
 
 ## Author
 
