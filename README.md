@@ -2,7 +2,7 @@
 
 Operator-local tooling that turns a Monero node's `sync_info` peer list into a **diversity score** and actionable warnings. No consensus changes, no network-wide crawl.
 
-This is **alpha / milestone-0** — a proof of concept for the **[Peer Fortress — Tor & Eclipse Defense](https://github.com/1igaming/peer-fortress/issues/1)** CCS proposal (62 XMR, 4 months). Tor egress health checks, spy heuristics, playbooks, and monerosim scenarios are planned in funded milestones M1–M4. See [ROADMAP.md](ROADMAP.md).
+This is **alpha / milestone-0** — a proof of concept for the **[Peer Fortress — Tor & Eclipse Defense](https://github.com/1igaming/peer-fortress/issues/1)** CCS proposal (62 XMR, 4 months). Tor egress health checks, spy heuristics, playbooks, and monerosim scenarios are planned in proposed milestones M1–M4. See [ROADMAP.md](ROADMAP.md).
 
 **v0.3.0:** JSON schema validation, rotation advisory, `--out` flag. Release: https://github.com/1igaming/peer-fortress/releases/tag/v0.3.0
 
@@ -16,10 +16,18 @@ Home nodes running default `monerod` configs can end up peer-heavy on a single s
 
 ## Quick start (mock mode — no daemon)
 
-```powershell
-cd G:\Monero-CC\repos\peer-fortress
+```bash
+git clone https://github.com/1igaming/peer-fortress.git
+cd peer-fortress
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+
+# On Windows (PowerShell):
+.venv\Scripts\Activate.ps1
+# On Windows (CMD):
+.venv\Scripts\activate.bat
+# On macOS/Linux:
+source .venv/bin/activate
+
 pip install -r requirements.txt
 python -m peer_fortress
 ```
@@ -134,17 +142,17 @@ python -m unittest discover -s tests -v
 
 CI runs the same suite on push via [GitHub Actions](.github/workflows/ci.yml).
 
-## Roadmap (funded CCS milestones)
+## Roadmap (proposed CCS milestones)
 
 See [ROADMAP.md](ROADMAP.md) for full detail. Summary:
 
 | # | Name | Funds | Status |
 |---|------|-------|--------|
 | M0 | Prototype (diversity + Tor SOCKS5 stub) | pre-funding | **shipped** [v0.3.0](https://github.com/1igaming/peer-fortress/releases/tag/v0.3.0) |
-| M1 | CLI, diversity scoring, and testnet demo | 14 XMR | funded milestone |
-| M2 | Spy heuristics, Tor egress health, and playbook templates | 16 XMR | funded milestone |
-| M3 | Optional local UI and operator hardening guide | 14 XMR | funded milestone |
-| M4 | monerosim scenario pack (5 scenarios) and documentation | 18 XMR | funded milestone |
+| M1 | CLI, diversity scoring, and testnet demo | 14 XMR | proposed milestone |
+| M2 | Spy heuristics, Tor egress health, and playbook templates | 16 XMR | proposed milestone |
+| M3 | Optional local UI and operator hardening guide | 14 XMR | proposed milestone |
+| M4 | monerosim scenario pack (5 scenarios) and documentation | 18 XMR | proposed milestone |
 
 ## License
 
