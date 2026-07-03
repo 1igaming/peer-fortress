@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from typing import Any
 
-from peer_fortress.diversity import DiversityReport, PeerRecord
+from peer_fortress.diversity import DiversityReport
 
 
 @dataclass
@@ -52,13 +52,18 @@ def analyze_spy_heuristics(
     clearnet_peers = [p for p in peers if ".onion" not in str(p.get("address", "")).lower()]
     total_clearnet = len(clearnet_peers)
 
+    # Uniform support_flags alone is weak evidence (flags=1 is the network
+    # norm), so only raise it when the peer set is also subnet-concentrated,
+    # which is the pattern for automated spy deployments.
+    subnet_concentrated = report.max_bucket_share >= 0.25 and report.max_bucket_label != "onion"
+
     if total_clearnet >= 5:
         # Check support flags concentration
         flag_counts = Counter(p.get("support_flags", 0) for p in clearnet_peers)
         most_common_flag, count = flag_counts.most_common(1)[0]
         flag_ratio = count / total_clearnet
 
-        if flag_ratio > 0.8:
+        if flag_ratio > 0.8 and subnet_concentrated:
             score += 15
             signals.append({
                 "type": "support_flags_concentration",
@@ -81,7 +86,32 @@ def analyze_spy_heuristics(
                 })
                 warnings.append("Identical pruning seeds across distinct P2P addresses; highly suspicious.")
 
-    # Heuristic 2: Subnet Concentration (Sybil Bucketing)
+    # Heuristic 2: Duplicate Peer IDs
+    # monerod generates a random 64-bit peer_id per instance. The same non-zero
+    # peer_id reachable at multiple distinct hosts means a single instance is
+    # fronted by several addresses (proxy fan-out / sybil), a strong signal.
+    hosts_by_peer_id: dict[Any, set[str]] = defaultdict(set)
+    for p in peers:
+        pid = p.get("peer_id")
+        if pid:
+            host = str(p.get("host") or p.get("address") or "").strip()
+            if host:
+                hosts_by_peer_id[pid].add(host)
+    duplicated_ids = {pid: hosts for pid, hosts in hosts_by_peer_id.items() if len(hosts) > 1}
+    if duplicated_ids:
+        score += min(30, 15 * len(duplicated_ids))
+        for pid, hosts in duplicated_ids.items():
+            signals.append({
+                "type": "duplicate_peer_id",
+                "severity": "high",
+                "description": f"peer_id {pid} appears at {len(hosts)} distinct addresses.",
+            })
+        warnings.append(
+            f"{len(duplicated_ids)} peer_id(s) shared across multiple addresses; "
+            "one node instance may be fronted by several IPs."
+        )
+
+    # Heuristic 3: Subnet Concentration (Sybil Bucketing)
     # If a /24 bucket contains multiple distinct peer hosts, it's highly likely to be
     # a single operator running multiple spy instances on the same host or subnet.
     for bucket, count in report.bucket_counts.items():
@@ -95,7 +125,7 @@ def analyze_spy_heuristics(
             warnings.append(f"Subnet {bucket} has {count} active clearnet peer connections (potential sybil group).")
             spy_report.sybil_clusters_detected += 1
 
-    # Heuristic 3: onion vs Clearnet Egress saturation
+    # Heuristic 4: onion vs Clearnet Egress saturation
     # If the operator expects Tor but clearnet connections are overwhelming the peer list,
     # or vice versa, the node's circuit could be saturated or eclipsed.
     if report.total_peers >= 10:
