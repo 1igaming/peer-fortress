@@ -34,6 +34,30 @@ class DiversityTests(unittest.TestCase):
         report = analyze_sync_info({"peers": peers})
         self.assertEqual(report.duplicate_hosts, 1)
 
+    def test_bare_ipv6_address_classified(self):
+        # No "host" field: host must be recovered from a bare IPv6 address
+        # without treating the last colon group as a port.
+        peers = [{"address": "2001:db8::1"}]
+        report = analyze_sync_info({"peers": peers})
+        self.assertEqual(report.peers[0].kind, "ipv6")
+        self.assertEqual(report.peers[0].bucket, "2001:db8::/48")
+
+    def test_bracketed_ipv6_with_port(self):
+        peers = [{"address": "[2001:db8::1]:18080"}]
+        report = analyze_sync_info({"peers": peers})
+        self.assertEqual(report.peers[0].host, "2001:db8::1")
+        self.assertEqual(report.peers[0].kind, "ipv6")
+
+    def test_onion_port_stripped_for_duplicates(self):
+        # Same onion host on two ports should collapse to one duplicate.
+        peers = [
+            {"address": "vww6ybal4bd7szmgncyruucpgfkqahzddi37ktceo3ah7ngmcopnpyyd.onion:18080"},
+            {"address": "vww6ybal4bd7szmgncyruucpgfkqahzddi37ktceo3ah7ngmcopnpyyd.onion:18081"},
+        ]
+        report = analyze_sync_info({"peers": peers})
+        self.assertEqual(report.duplicate_hosts, 1)
+        self.assertEqual(report.onion_peers, 2)
+
 
 if __name__ == "__main__":
     unittest.main()

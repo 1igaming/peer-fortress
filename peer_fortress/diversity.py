@@ -82,8 +82,15 @@ def _extract_host(raw: str) -> str:
         end = raw.find("]")
         if end != -1:
             return raw[1:end]
-    if ":" in raw and not ONION_RE.search(raw):
-        # IPv4 host:port — last colon separates port
+    if ONION_RE.search(raw):
+        # Strip optional :port so duplicate onion hosts collapse to one entry.
+        host, _, port = raw.rpartition(":")
+        if port.isdigit():
+            return host
+        return raw
+    # A bare (unbracketed) IPv6 address contains multiple colons and carries
+    # no port — stripping after the last colon would mangle it.
+    if raw.count(":") == 1:
         host, _, port = raw.rpartition(":")
         if port.isdigit():
             return host
