@@ -156,11 +156,19 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if report.reachable else 1
 
     if args.rpc:
-        sync_info = fetch_sync_info(args.rpc)
+        try:
+            sync_info = fetch_sync_info(args.rpc)
+        except (OSError, RuntimeError, ValueError) as exc:
+            print(f"error: could not fetch sync_info from {args.rpc}: {exc}", file=sys.stderr)
+            return 2
         source = args.rpc
     elif args.mock is not None:
         fixture = Path(args.mock)
-        sync_info = load_fixture(fixture)
+        try:
+            sync_info = load_fixture(fixture)
+        except (OSError, ValueError) as exc:
+            print(f"error: could not load fixture {fixture}: {exc}", file=sys.stderr)
+            return 2
         source = str(fixture)
     else:
         # Default: mock mode — no daemon required.
